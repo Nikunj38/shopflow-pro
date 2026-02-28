@@ -1,71 +1,105 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, Trash2 } from "lucide-react";
-import React from "react";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import React, { useState, useEffect } from "react";
 
-const CartSheet = ({ children }: { children: React.ReactNode }) => {
-  const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
+const CartSheet = ({ children }: { children?: React.ReactNode }) => {
+  const { items, updateQuantity, removeFromCart, totalPrice, totalItems } = useCart();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-cart", handler);
+    return () => window.removeEventListener("open-cart", handler);
+  }, []);
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex flex-col bg-background">
-        <SheetHeader>
-          <SheetTitle className="font-display text-xl">Your Cart</SheetTitle>
+    <Sheet open={open} onOpenChange={setOpen}>
+      {children}
+      <SheetContent className="flex flex-col bg-card p-0 w-full sm:max-w-md">
+        <SheetHeader className="border-b border-border px-5 py-4">
+          <SheetTitle className="flex items-center gap-2 text-lg font-bold">
+            <ShoppingBag className="h-5 w-5 text-primary" />
+            My Cart
+            {totalItems > 0 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+                {totalItems}
+              </span>
+            )}
+          </SheetTitle>
         </SheetHeader>
 
         {items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
-            <p className="text-sm">Your cart is empty</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground p-8">
+            <ShoppingBag className="h-16 w-16 opacity-20" />
+            <p className="text-sm font-medium">Your cart is empty</p>
+            <p className="text-xs">Add items to get started</p>
           </div>
         ) : (
           <>
-            <div className="flex-1 space-y-4 overflow-y-auto py-4">
+            <div className="flex-1 space-y-0 overflow-y-auto">
               {items.map(({ product, quantity }) => (
-                <div key={product.id} className="flex gap-3 animate-fade-in">
+                <div key={product.id} className="flex gap-3 border-b border-border px-5 py-4 animate-fade-in">
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="h-20 w-20 rounded-md object-cover"
+                    className="h-16 w-16 rounded-lg object-cover bg-muted"
                   />
-                  <div className="flex flex-1 flex-col justify-between">
+                  <div className="flex flex-1 flex-col justify-between min-w-0">
                     <div>
-                      <p className="text-sm font-medium text-foreground">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">${product.price}</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">{product.unit}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuantity(product.id, quantity - 1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="text-sm font-medium w-6 text-center">{quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(product.id, quantity + 1)}
-                        className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
-                      <button
-                        onClick={() => removeFromCart(product.id)}
-                        className="ml-auto text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center gap-0 rounded-md border border-border overflow-hidden">
+                        <button
+                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                          className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="flex h-7 w-7 items-center justify-center text-xs font-bold text-foreground bg-muted/50">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(product.id, quantity + 1)}
+                          className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-foreground">₹{product.price * quantity}</span>
+                        <button
+                          onClick={() => removeFromCart(product.id)}
+                          className="text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="border-t border-border pt-4 space-y-3">
-              <div className="flex justify-between text-base font-semibold text-foreground">
-                <span>Total</span>
-                <span>${totalPrice.toFixed(2)}</span>
+
+            {/* Footer */}
+            <div className="border-t border-border p-5 space-y-3 bg-background">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold text-foreground">₹{totalPrice.toFixed(0)}</span>
               </div>
-              <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-accent">
-                Checkout
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Delivery</span>
+                <span className="font-semibold text-primary">FREE</span>
+              </div>
+              <div className="flex justify-between text-base border-t border-border pt-3">
+                <span className="font-bold text-foreground">Total</span>
+                <span className="font-bold text-foreground">₹{totalPrice.toFixed(0)}</span>
+              </div>
+              <Button className="w-full h-12 bg-primary text-primary-foreground font-bold text-sm hover:brightness-110 shadow-brand">
+                Proceed to Checkout · ₹{totalPrice.toFixed(0)}
               </Button>
             </div>
           </>

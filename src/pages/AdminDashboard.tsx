@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, ArrowLeft, Package } from "lucide-react";
-import { Product } from "@/data/products";
+import { Plus, Pencil, Trash2, ArrowLeft, Package, BarChart3, Boxes, Tag } from "lucide-react";
+import { Product, CATEGORIES } from "@/data/products";
 import { toast } from "sonner";
 
-const emptyForm = { name: "", description: "", price: 0, image: "", category: "", stock: 0 };
+const emptyForm = { name: "", description: "", price: 0, mrp: 0, image: "", category: "", unit: "", stock: 0 };
 
 const AdminDashboard = () => {
   const { user, isAdmin, logout } = useAuth();
@@ -29,7 +29,7 @@ const AdminDashboard = () => {
 
   const openEdit = (p: Product) => {
     setEditingId(p.id);
-    setForm({ name: p.name, description: p.description, price: p.price, image: p.image, category: p.category, stock: p.stock });
+    setForm({ name: p.name, description: p.description, price: p.price, mrp: p.mrp || 0, image: p.image, category: p.category, unit: p.unit, stock: p.stock });
     setDialogOpen(true);
   };
 
@@ -53,65 +53,91 @@ const AdminDashboard = () => {
     toast.success("Product removed");
   };
 
+  const totalStock = products.reduce((s, p) => s + p.stock, 0);
+  const categoriesCount = new Set(products.map((p) => p.category)).size;
+  const lowStock = products.filter((p) => p.stock < 10).length;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin Nav */}
-      <header className="sticky top-0 z-50 border-b border-border bg-primary text-primary-foreground">
+      {/* Admin Header */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card shadow-card">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 text-sm opacity-70 hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" />
-              Shop
+              Back to Shop
             </Link>
-            <span className="font-display text-lg font-bold">Admin Dashboard</span>
+            <div className="h-5 w-px bg-border" />
+            <span className="text-base font-bold text-foreground">Admin Dashboard</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm opacity-70">{user.email}</span>
-            <Button variant="outline" size="sm" onClick={logout} className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
+            <span className="text-xs text-muted-foreground hidden sm:inline">{user.email}</span>
+            <Button variant="outline" size="sm" onClick={logout}>
               Logout
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Stats */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: "Total Products", value: products.length },
-            { label: "Total Stock", value: products.reduce((s, p) => s + p.stock, 0) },
-            { label: "Categories", value: new Set(products.map(p => p.category)).size },
-          ].map(stat => (
-            <div key={stat.label} className="rounded-lg border border-border bg-card p-5 shadow-card">
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="mt-1 text-3xl font-bold text-foreground">{stat.value}</p>
+            { icon: Package, label: "Total Products", value: products.length, color: "text-primary" },
+            { icon: Boxes, label: "Total Stock", value: totalStock, color: "text-brand-orange" },
+            { icon: Tag, label: "Categories", value: categoriesCount, color: "text-secondary" },
+            { icon: BarChart3, label: "Low Stock", value: lowStock, color: "text-destructive" },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-xl border border-border bg-card p-5 shadow-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
 
         {/* Product List */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-2xl font-semibold text-foreground">Products</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-foreground">Products</h2>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openAdd} className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-accent">
+              <Button onClick={openAdd} className="bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-brand">
                 <Plus className="mr-2 h-4 w-4" /> Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-background">
+            <DialogContent className="bg-card">
               <DialogHeader>
-                <DialogTitle className="font-display">{editingId ? "Edit Product" : "New Product"}</DialogTitle>
+                <DialogTitle className="text-lg font-bold">{editingId ? "Edit Product" : "New Product"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-3 pt-2">
-                <Input placeholder="Product name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="bg-card" />
-                <Textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="bg-card" />
+                <Input placeholder="Product name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="bg-background" />
+                <Textarea placeholder="Description" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="bg-background" />
                 <div className="grid grid-cols-2 gap-3">
-                  <Input type="number" placeholder="Price" value={form.price || ""} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))} className="bg-card" />
-                  <Input type="number" placeholder="Stock" value={form.stock || ""} onChange={e => setForm(f => ({ ...f, stock: +e.target.value }))} className="bg-card" />
+                  <Input type="number" placeholder="Price (₹)" value={form.price || ""} onChange={(e) => setForm((f) => ({ ...f, price: +e.target.value }))} className="bg-background" />
+                  <Input type="number" placeholder="MRP (₹)" value={form.mrp || ""} onChange={(e) => setForm((f) => ({ ...f, mrp: +e.target.value }))} className="bg-background" />
                 </div>
-                <Input placeholder="Category" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="bg-card" />
-                <Input placeholder="Image URL" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} className="bg-card" />
-                <Button onClick={handleSave} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                <div className="grid grid-cols-2 gap-3">
+                  <Input type="number" placeholder="Stock" value={form.stock || ""} onChange={(e) => setForm((f) => ({ ...f, stock: +e.target.value }))} className="bg-background" />
+                  <Input placeholder="Unit (e.g. 500 g)" value={form.unit} onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))} className="bg-background" />
+                </div>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground"
+                >
+                  <option value="">Select Category</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <Input placeholder="Image URL" value={form.image} onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))} className="bg-background" />
+                <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground font-bold hover:brightness-110">
                   {editingId ? "Update" : "Add"} Product
                 </Button>
               </div>
@@ -119,25 +145,37 @@ const AdminDashboard = () => {
           </Dialog>
         </div>
 
-        <div className="space-y-2">
-          {products.map(p => (
-            <div key={p.id} className="flex items-center gap-4 rounded-lg border border-border bg-card p-4 shadow-card animate-fade-in">
+        {/* Table-like list */}
+        <div className="rounded-xl border border-border overflow-hidden bg-card shadow-card">
+          <div className="hidden sm:grid grid-cols-[auto_1fr_100px_80px_80px_80px] gap-4 px-5 py-3 border-b border-border bg-muted text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="w-12" />
+            <span>Product</span>
+            <span>Category</span>
+            <span className="text-right">Price</span>
+            <span className="text-right">Stock</span>
+            <span className="text-right">Actions</span>
+          </div>
+          {products.map((p) => (
+            <div key={p.id} className="grid sm:grid-cols-[auto_1fr_100px_80px_80px_80px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors animate-fade-in">
               {p.image ? (
-                <img src={p.image} alt={p.name} className="h-14 w-14 rounded-md object-cover" />
+                <img src={p.image} alt={p.name} className="h-10 w-10 rounded-lg object-cover bg-muted" />
               ) : (
-                <div className="flex h-14 w-14 items-center justify-center rounded-md bg-secondary">
-                  <Package className="h-6 w-6 text-muted-foreground" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                  <Package className="h-5 w-5 text-muted-foreground" />
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground truncate">{p.name}</p>
-                <p className="text-sm text-muted-foreground">{p.category} · ${p.price} · {p.stock} in stock</p>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                <p className="text-xs text-muted-foreground sm:hidden">{p.unit} · ₹{p.price}</p>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => openEdit(p)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+              <span className="hidden sm:inline text-xs text-muted-foreground capitalize">{p.category}</span>
+              <span className="hidden sm:block text-sm font-semibold text-foreground text-right">₹{p.price}</span>
+              <span className={`hidden sm:block text-sm font-semibold text-right ${p.stock < 10 ? "text-destructive" : "text-foreground"}`}>{p.stock}</span>
+              <div className="flex gap-1 justify-end">
+                <button onClick={() => openEdit(p)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                   <Pencil className="h-4 w-4" />
                 </button>
-                <button onClick={() => handleDelete(p.id)} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
+                <button onClick={() => handleDelete(p.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
