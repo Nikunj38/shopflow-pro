@@ -26,42 +26,32 @@ const AdminLoginPage = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6 animate-fade-in">
-        <Link to="/" className="block font-display text-2xl font-bold text-center text-foreground">
-          Atelier
+        <Link to="/" className="block text-center">
+          <span className="text-2xl font-extrabold text-primary">FreshCart</span>
         </Link>
-        <div className="text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-            <ShieldCheck className="h-6 w-6 text-accent" />
+        <div className="rounded-2xl bg-card border border-border p-6 shadow-elevated space-y-5">
+          <div className="text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground">Admin Access</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Sign in with admin credentials</p>
           </div>
-          <h1 className="font-display text-2xl font-semibold text-foreground">Admin Access</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in with admin credentials
-          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input type="email" placeholder="Admin email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-background h-11" />
+            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background h-11" />
+            <Button type="submit" className="w-full h-11 bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-brand">
+              Sign In as Admin
+            </Button>
+          </form>
+
+          <div className="rounded-lg bg-muted px-3 py-2 text-center">
+            <p className="text-[11px] text-muted-foreground">
+              Demo: <span className="font-semibold text-foreground">admin@shop.com</span> / <span className="font-semibold text-foreground">admin123</span>
+            </p>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="email"
-            placeholder="Admin email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="bg-card"
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="bg-card"
-          />
-          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-            Sign In as Admin
-          </Button>
-        </form>
-
-        <p className="text-center text-xs text-muted-foreground">
-          Demo: admin@shop.com / admin123
-        </p>
       </div>
     </div>
   );
