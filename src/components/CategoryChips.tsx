@@ -8,29 +8,29 @@ interface CategoryChipsProps {
 
 const CategoryChips = ({ categories, selected, onSelect }: CategoryChipsProps) => {
   return (
-    <div className="flex gap-3 overflow-x-auto scrollbar-hide py-1 px-1">
+    <div className="flex gap-2.5 overflow-x-auto scrollbar-hide py-1 px-1">
       <button
         onClick={() => onSelect(null)}
-        className={`flex flex-col items-center gap-1.5 rounded-xl px-4 py-3 text-xs font-semibold transition-all shrink-0 min-w-[72px] ${
+        className={`flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold transition-all shrink-0 ${
           selected === null
             ? "bg-primary text-primary-foreground shadow-brand"
-            : "bg-card text-foreground shadow-card hover:shadow-elevated"
+            : "bg-card text-foreground border border-border hover:border-primary/30"
         }`}
       >
-        <span className="text-lg">🛒</span>
+        <span className="text-base">🛒</span>
         <span>All</span>
       </button>
       {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id === selected ? null : cat.id)}
-          className={`flex flex-col items-center gap-1.5 rounded-xl px-4 py-3 text-xs font-semibold transition-all shrink-0 min-w-[72px] ${
+          className={`flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold transition-all shrink-0 ${
             selected === cat.id
               ? "bg-primary text-primary-foreground shadow-brand"
-              : `bg-card text-foreground shadow-card hover:shadow-elevated`
+              : "bg-card text-foreground border border-border hover:border-primary/30"
           }`}
         >
-          <span className="text-lg">{cat.icon}</span>
+          <span className="text-base">{cat.icon}</span>
           <span>{cat.name}</span>
         </button>
       ))}

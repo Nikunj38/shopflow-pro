@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -51,12 +52,13 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
-          green: "hsl(var(--brand-green))",
-          "green-light": "hsl(var(--brand-green-light))",
-          yellow: "hsl(var(--brand-yellow))",
-          "yellow-light": "hsl(var(--brand-yellow-light))",
-          orange: "hsl(var(--brand-orange))",
-          red: "hsl(var(--brand-red))",
+          primary: "hsl(var(--brand-primary))",
+          "primary-light": "hsl(var(--brand-primary-light))",
+          secondary: "hsl(var(--brand-secondary))",
+          "secondary-light": "hsl(var(--brand-secondary-light))",
+          warm: "hsl(var(--brand-warm))",
+          "warm-light": "hsl(var(--brand-warm-light))",
+          danger: "hsl(var(--brand-danger))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
