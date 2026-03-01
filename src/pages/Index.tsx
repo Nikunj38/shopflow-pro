@@ -32,13 +32,13 @@ const Index = () => {
       <ShopNavbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <CartSheet />
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto px-4 py-6 space-y-8">
         {/* Promo */}
         <PromoBanner />
 
         {/* Categories */}
         <section>
-          <h2 className="text-lg font-bold text-foreground mb-3">Shop by Category</h2>
+          <h2 className="font-display text-lg font-bold text-foreground mb-3">Shop by Category</h2>
           <CategoryChips
             categories={CATEGORIES}
             selected={selectedCategory}
@@ -49,7 +49,7 @@ const Index = () => {
         {/* Products */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">{selectedCategoryName}</h2>
+            <h2 className="font-display text-lg font-bold text-foreground">{selectedCategoryName}</h2>
             <span className="text-xs font-medium text-muted-foreground">
               {filteredProducts.length} items
             </span>
@@ -57,7 +57,7 @@ const Index = () => {
 
           {filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <p className="text-lg font-semibold">No items found</p>
+              <p className="font-display text-lg font-semibold">No items found</p>
               <p className="text-sm mt-1">Try a different search or category</p>
             </div>
           ) : (
@@ -73,7 +73,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border mt-12 py-8 bg-card">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm font-bold text-foreground">FreshCart</p>
+          <p className="font-display text-sm font-bold text-foreground">FreshCart</p>
           <p className="text-xs text-muted-foreground mt-1">Fresh groceries delivered to your door in minutes.</p>
         </div>
       </footer>

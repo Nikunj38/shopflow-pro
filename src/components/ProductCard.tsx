@@ -29,16 +29,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="group relative flex flex-col rounded-xl bg-card border border-border shadow-card hover:shadow-elevated transition-shadow animate-fade-in overflow-hidden">
+    <div className="group relative flex flex-col rounded-2xl bg-card border border-border hover:border-primary/20 shadow-card hover:shadow-elevated transition-all animate-fade-in overflow-hidden">
       {/* Tag */}
       {product.tag && (
         <span
-          className={`absolute top-2 left-2 z-10 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+          className={`absolute top-2.5 left-2.5 z-10 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
             product.tag === "bestseller"
               ? "bg-primary text-primary-foreground"
               : product.tag === "offer"
-              ? "bg-secondary text-secondary-foreground"
-              : "bg-brand-orange text-primary-foreground"
+              ? "bg-accent text-accent-foreground"
+              : "bg-secondary text-secondary-foreground"
           }`}
         >
           {product.tag === "offer" ? `${discount}% OFF` : product.tag}
@@ -46,27 +46,27 @@ const ProductCard = ({ product }: ProductCardProps) => {
       )}
 
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-muted p-4">
+      <div className="relative aspect-square overflow-hidden bg-muted/50 p-3">
         <img
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col p-3 gap-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex flex-1 flex-col p-3.5 gap-1.5">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
           {product.unit}
         </span>
-        <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">
+        <h3 className="font-display text-sm font-semibold text-foreground leading-tight line-clamp-2">
           {product.name}
         </h3>
 
         <div className="mt-auto flex items-end justify-between pt-2">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-bold text-foreground">₹{product.price}</span>
+            <span className="font-display text-base font-bold text-foreground">₹{product.price}</span>
             {product.mrp && product.mrp > product.price && (
               <span className="text-xs text-muted-foreground line-through">₹{product.mrp}</span>
             )}
@@ -76,13 +76,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {quantity === 0 ? (
             <button
               onClick={handleAdd}
-              className="flex items-center gap-1 rounded-lg border-2 border-primary px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+              className="flex items-center gap-1 rounded-full border-2 border-primary px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
             >
               ADD
               <Plus className="h-3.5 w-3.5" />
             </button>
           ) : (
-            <div className="flex items-center gap-0 rounded-lg bg-primary overflow-hidden animate-scale-in">
+            <div className="flex items-center gap-0 rounded-full bg-primary overflow-hidden animate-scale-in">
               <button
                 onClick={() => updateQuantity(product.id, quantity - 1)}
                 className="flex h-8 w-8 items-center justify-center text-primary-foreground hover:bg-primary-foreground/10 transition-colors"
