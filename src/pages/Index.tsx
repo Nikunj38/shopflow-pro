@@ -6,21 +6,24 @@ import PromoBanner from "@/components/PromoBanner";
 import CartSheet from "@/components/CartSheet";
 import { useStore } from "@/context/StoreContext";
 import { CATEGORIES } from "@/data/products";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { products } = useStore();
+  const { products, isLoading } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchesSearch =
-        !searchQuery ||
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = !selectedCategory || p.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
+    return products
+      .filter(p => p.is_active)
+      .filter((p) => {
+        const matchesSearch =
+          !searchQuery ||
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.category.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = !selectedCategory || p.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      });
   }, [products, searchQuery, selectedCategory]);
 
   const selectedCategoryName = selectedCategory
@@ -33,10 +36,8 @@ const Index = () => {
       <CartSheet />
 
       <main className="container mx-auto px-4 py-6 space-y-8">
-        {/* Promo */}
         <PromoBanner />
 
-        {/* Categories */}
         <section>
           <h2 className="font-display text-lg font-bold text-foreground mb-3">Shop by Category</h2>
           <CategoryChips
@@ -46,7 +47,6 @@ const Index = () => {
           />
         </section>
 
-        {/* Products */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-lg font-bold text-foreground">{selectedCategoryName}</h2>
@@ -55,7 +55,13 @@ const Index = () => {
             </span>
           </div>
 
-          {filteredProducts.length === 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <p className="font-display text-lg font-semibold">No items found</p>
               <p className="text-sm mt-1">Try a different search or category</p>
@@ -70,7 +76,6 @@ const Index = () => {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-border mt-12 py-8 bg-card">
         <div className="container mx-auto px-4 text-center">
           <p className="font-display text-sm font-bold text-foreground">FreshCart</p>

@@ -32,7 +32,6 @@ const ShopNavbar = ({ searchQuery, onSearchChange }: ShopNavbarProps) => {
             </div>
           </Link>
 
-          {/* Search */}
           <div className="flex-1 max-w-xl">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -46,7 +45,6 @@ const ShopNavbar = ({ searchQuery, onSearchChange }: ShopNavbarProps) => {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-1.5">
             {isAdmin && (
               <Link
@@ -60,7 +58,7 @@ const ShopNavbar = ({ searchQuery, onSearchChange }: ShopNavbarProps) => {
 
             {user ? (
               <button
-                onClick={() => { logout(); navigate("/"); }}
+                onClick={async () => { await logout(); navigate("/"); }}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 <LogOut className="h-4 w-4" />
@@ -76,7 +74,6 @@ const ShopNavbar = ({ searchQuery, onSearchChange }: ShopNavbarProps) => {
               </Link>
             )}
 
-            {/* Cart button */}
             <button
               onClick={() => window.dispatchEvent(new Event("open-cart"))}
               className="relative flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors shadow-brand"

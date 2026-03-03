@@ -4,22 +4,39 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { loginAsAdmin } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { login, user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (user && isAdmin) {
+    navigate("/admin");
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = loginAsAdmin(email, password);
-    if (success) {
-      toast.success("Welcome, Admin!");
-      navigate("/admin");
-    } else {
-      toast.error("Invalid admin credentials");
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const success = await login(email, password);
+      if (success) {
+        toast.success("Signed in! Checking admin access...");
+        setTimeout(() => navigate("/admin"), 500);
+      } else {
+        toast.error("Invalid email or password");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -39,18 +56,12 @@ const AdminLoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            <Input type="email" placeholder="Admin email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-background h-11" />
-            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background h-11" />
-            <Button type="submit" className="w-full h-11 bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-brand">
-              Sign In as Admin
+            <Input type="email" placeholder="Admin email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-background h-11" disabled={loading} />
+            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-background h-11" disabled={loading} />
+            <Button type="submit" disabled={loading} className="w-full h-11 bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-brand">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In as Admin"}
             </Button>
           </form>
-
-          <div className="rounded-lg bg-muted px-3 py-2 text-center">
-            <p className="text-[11px] text-muted-foreground">
-              Demo: <span className="font-semibold text-foreground">admin@shop.com</span> / <span className="font-semibold text-foreground">admin123</span>
-            </p>
-          </div>
         </div>
       </div>
     </div>
