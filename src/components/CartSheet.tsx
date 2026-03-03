@@ -39,49 +39,53 @@ const CartSheet = ({ children }: { children?: React.ReactNode }) => {
         ) : (
           <>
             <div className="flex-1 space-y-0 overflow-y-auto">
-              {items.map(({ product, quantity }) => (
-                <div key={product.id} className="flex gap-3 border-b border-border px-5 py-4 animate-fade-in">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-16 w-16 rounded-lg object-cover bg-muted"
-                  />
-                  <div className="flex flex-1 flex-col justify-between min-w-0">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">{product.unit}</p>
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <div className="flex items-center gap-0 rounded-md border border-border overflow-hidden">
-                        <button
-                          onClick={() => updateQuantity(product.id, quantity - 1)}
-                          className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="flex h-7 w-7 items-center justify-center text-xs font-bold text-foreground bg-muted/50">
-                          {quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(product.id, quantity + 1)}
-                          className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
+              {items.map(({ product, variantId, quantity }) => {
+                const variant = product.variants.find(v => v.id === variantId);
+                if (!variant) return null;
+                return (
+                  <div key={`${product.id}-${variantId}`} className="flex gap-3 border-b border-border px-5 py-4 animate-fade-in">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="h-16 w-16 rounded-lg object-cover bg-muted"
+                    />
+                    <div className="flex flex-1 flex-col justify-between min-w-0">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">{variant.label}</p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-foreground">₹{product.price * quantity}</span>
-                        <button
-                          onClick={() => removeFromCart(product.id)}
-                          className="text-muted-foreground hover:text-destructive transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                      <div className="flex items-center justify-between mt-1">
+                        <div className="flex items-center gap-0 rounded-md border border-border overflow-hidden">
+                          <button
+                            onClick={() => updateQuantity(product.id, variantId, quantity - 1)}
+                            className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="flex h-7 w-7 items-center justify-center text-xs font-bold text-foreground bg-muted/50">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() => updateQuantity(product.id, variantId, Math.min(quantity + 1, variant.stock))}
+                            className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-foreground">₹{variant.price * quantity}</span>
+                          <button
+                            onClick={() => removeFromCart(product.id, variantId)}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Footer */}

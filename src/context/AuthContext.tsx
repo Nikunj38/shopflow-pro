@@ -1,50 +1,71 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
-  user: { email: string } | null;
+  user: User | null;
+  session: Session | null;
   isAdmin: boolean;
-  login: (email: string, password: string) => boolean;
-  register: (email: string, password: string) => boolean;
-  loginAsAdmin: (email: string, password: string) => boolean;
-  logout: () => void;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = useCallback((email: string, _password: string) => {
-    // Mock login — accepts any credentials
-    setUser({ email });
-    setIsAdmin(false);
-    return true;
+  const checkAdminRole = useCallback(async (userId: string) => {
+    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    setIsAdmin(!!data);
   }, []);
 
-  const register = useCallback((email: string, _password: string) => {
-    setUser({ email });
-    setIsAdmin(false);
-    return true;
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        // Defer role check to avoid deadlocks
+        setTimeout(() => checkAdminRole(session.user.id), 0);
+      } else {
+        setIsAdmin(false);
+      }
+      setIsLoading(false);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAdminRole(session.user.id);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [checkAdminRole]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return !error;
   }, []);
 
-  const loginAsAdmin = useCallback((email: string, password: string) => {
-    // Demo admin: admin@shop.com / admin123
-    if (email === "admin@shop.com" && password === "admin123") {
-      setUser({ email });
-      setIsAdmin(true);
-      return true;
-    }
-    return false;
+  const register = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
+    return !error;
   }, []);
 
-  const logout = useCallback(() => {
-    setUser(null);
-    setIsAdmin(false);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, login, register, loginAsAdmin, logout }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
